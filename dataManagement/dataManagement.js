@@ -8,5 +8,17 @@ module.exports = {
                 return cheerio.load(response.data);
             })
             .catch(console.error);
+    },
+    getUserData: function (data) {
+        return new Promise((resolve, reject) => {
+            const user =  {
+                name: data.name,
+                direction: 'PIO 12',
+                phoneNumber: '2648776',
+                cellPhone: '0999245146',
+                email: 'fernando_3327@hotmail.com'
+            };
+            resolve(user);
+        });
     }
   };
