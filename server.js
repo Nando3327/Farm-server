@@ -9,6 +9,14 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+    next();
+});
+
 
 app.get('/', (req, res) => {
     res.status(200).send("Welcome to API REST")
@@ -16,8 +24,8 @@ app.get('/', (req, res) => {
 
 let respuesta = {
     error: false,
-    codigo: 200,
-    mensaje: '',
+    code: 200,
+    message: '',
     data: {}
 };
 
@@ -50,14 +58,15 @@ app.post('/login', function (req, res) {
     if(!req.body.name || !req.body.password) {
         respuesta = {
             error: true,
-            codigo: 9000,
-            mensaje: 'Error de usuario y/o contraseña'
+            code: 9000,
+            message: 'Error de usuario y/o contraseña'
         };
         res.send(respuesta);
     }else{
         const user = new LoginModel(req.body.name, req.body.password);
         lm.getUserInfo(user).then(data => {
             respuesta.data = data;
+            respuesta.message = 'OK';
             res.send(respuesta);
         });
     }
