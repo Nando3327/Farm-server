@@ -79,8 +79,27 @@ module.exports = {
     },
 
     getUserInfo: function (user) {
-        return dm.getUserData(user).then(u => {
-            return u;
+        return dm.getUserData(user).then(data => {
+            const response = {
+                code: 200,
+                message: 'OK',
+                data: {
+                    name: '',
+                    lastName: '',
+                    alias: '',
+                    key: ''
+                }
+            };
+            if(data){
+                response.data.name =  data.Name;
+                response.data.lastName =  data.LastName;
+                response.data.alias =  data.Alias;
+                response.data.key =  data.UserKey;
+            }else{
+                response.code = 9001;
+                response.message = 'USUARIO Y/O PASSWORD INCORRECTO';
+            }
+            return response;
         });
     }
 };

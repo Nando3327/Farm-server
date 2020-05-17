@@ -65,8 +65,9 @@ app.post('/login', function (req, res) {
     }else{
         const user = new LoginModel(req.body.name, req.body.password);
         lm.getUserInfo(user).then(data => {
-            respuesta.data = data;
-            respuesta.message = 'OK';
+            respuesta.code = data.code;
+            respuesta.data = data.data;
+            respuesta.message = data.message;
             res.send(respuesta);
         });
     }
