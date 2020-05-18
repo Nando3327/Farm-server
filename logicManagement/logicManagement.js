@@ -104,7 +104,8 @@ module.exports = {
                     name: '',
                     lastName: '',
                     alias: '',
-                    key: ''
+                    key: '',
+                    email: ''
                 }
             };
             if(data){
@@ -112,6 +113,7 @@ module.exports = {
                 response.data.lastName =  data.LastName;
                 response.data.alias =  data.Alias;
                 response.data.key =  data.UserKey;
+                response.data.email =  data.Email;
             }else{
                 response.code = 9001;
                 response.message = 'USUARIO Y/O PASSWORD INCORRECTO';
@@ -135,7 +137,7 @@ module.exports = {
             return validateExistAlias(user).then(alias => {
                 user.setAlias(alias);
                 user.setUserKey(alias);
-                return dm.registerUser(user).then(data => {
+                return dm.registerUser(user, mail).then(data => {
                     try{
                         const response = {
                             code: 200,

@@ -31,12 +31,13 @@ module.exports = {
     getUserData: function (data) {
         return new Promise((resolve, reject) => {
             try {
-                const query = 'SELECT Name, LastName, UserKey, Alias ' +
-                    'FROM SECURITY.users ' +
-                    'WHERE UserKey = "' + data.name + '" and Password = "' + md5(data.password) + '"';
+                const query = 'SELECT Name, LastName, U.UserKey, Alias, A.Value as Email ' +
+                    'FROM SECURITY.users U INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
+                    'WHERE (U.UserKey = "' + data.name + '" or A.value = "' + data.name + '") and Password = "' + md5(data.password) + '" and A.Categorie = "PR" and A.Type = "EM"';
                 connection.query(query, (err, rows) => {
                     if (err){
-                        throw new Error();
+                        reject(err);
+                        return;
                     }
                     resolve((rows && rows.length > 0) ? rows[0] : undefined);
                 });
@@ -47,7 +48,7 @@ module.exports = {
         });
     },
 
-    registerUser: function (data) {
+    registerUser: function (data, mail) {
         return new Promise((resolve, reject) => {
             try {
                 const user = {
@@ -62,7 +63,19 @@ module.exports = {
                         reject(err);
                         return;
                     }
-                    resolve(res);
+                    const address = {
+                        UserKey: data.userKey,
+                        Type: 'EM',
+                        Value: mail,
+                        Categorie: 'PR'
+                    };
+                    connection.query('INSERT SECURITY.address SET ?', address, (err, res) => {
+                        if (err){
+                            reject(err);
+                            return;
+                        }
+                        resolve(res);
+                    });
                 });
             } catch (e) {
                 console.log(e);
