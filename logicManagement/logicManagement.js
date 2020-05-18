@@ -42,6 +42,8 @@ let validateExistAlias = function(user) {
             }else{
                 resolve(alias);
             }
+        }).catch(e => {
+            reject(e);
         });
     });
 };

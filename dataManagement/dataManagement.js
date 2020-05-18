@@ -33,10 +33,10 @@ module.exports = {
             try {
                 const query = 'SELECT Name, LastName, U.UserKey, Alias, A.Value as Email ' +
                     'FROM SECURITY.users U INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
-                    'WHERE (U.UserKey = "' + data.name + '" or A.value = "' + data.name + '") and Password = "' + md5(data.password) + '" and A.Categorie = "PR" and A.Type = "EM"';
-                connection.query(query, (err, rows) => {
+                    'WHERE (U.UserKey = ? or A.value = ? ) and Password = ? and A.Categorie = "PR" and A.Type = "EM"';
+                connection.query(query, [data.name, data.name, md5(data.password)], (err, rows) => {
                     if (err){
-                        reject(err);
+                        reject('SQL ERROR');
                         return;
                     }
                     resolve((rows && rows.length > 0) ? rows[0] : undefined);
@@ -60,7 +60,7 @@ module.exports = {
                 };
                 connection.query('INSERT SECURITY.users SET ?', user, (err, res) => {
                     if (err){
-                        reject(err);
+                        reject('SQL ERROR');
                         return;
                     }
                     const address = {
@@ -71,7 +71,7 @@ module.exports = {
                     };
                     connection.query('INSERT SECURITY.address SET ?', address, (err, res) => {
                         if (err){
-                            reject(err);
+                            reject('SQL ERROR');
                             return;
                         }
                         resolve(res);
@@ -90,7 +90,10 @@ module.exports = {
                 'FROM SECURITY.users ' +
                 'WHERE userkey = "' + alias + '" or alias = "' + alias + '"';
             connection.query(query, (err, rows) => {
-                if (err) throw err;
+                if (err){
+                    reject('SQL ERROR');
+                    return;
+                }
                 resolve((rows && rows.length > 0));
             });
         });
@@ -102,7 +105,10 @@ module.exports = {
                 'FROM SECURITY.address ' +
                 'WHERE value = "' + mail + '"';
             connection.query(query, (err, rows) => {
-                if (err) throw err;
+                if (err){
+                    reject('SQL ERROR');
+                    return;
+                }
                 resolve((rows && rows.length > 0));
             });
         });
