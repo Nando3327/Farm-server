@@ -29,6 +29,23 @@ let sortData = function (data, sort, orientation) {
     });
 };
 
+let createAlias = function(user) {
+    return user.name.substring(0, 1).toUpperCase() + user.lastname.split(' ')[0] + Math.floor(Math.random() * 10000);
+};
+
+let validateExistAlias = function(user) {
+    let alias = createAlias(user);
+    return new Promise((resolve) => {
+        dm.validateExistAlias(alias).then(valid => {
+            if(valid) {
+                validateExistAlias(user);
+            }else{
+                resolve(alias);
+            }
+        });
+    });
+};
+
 module.exports = {
     getData: function (filter, max, sort, orientation, getAllData) {
         return dm.getData().then($ => {
@@ -100,6 +117,47 @@ module.exports = {
                 response.message = 'USUARIO Y/O PASSWORD INCORRECTO';
             }
             return response;
+        }).catch(e => {
+            console.log(e);
+            throw e
+        });
+    },
+
+    registerUser: function (user, mail) {
+        return dm.validateExistEmailAddres(mail).then(existEmail => {
+            if(existEmail){
+                return {
+                    code: 9000,
+                    message: 'EMAIL YA REGISTRADO',
+                    data: {}
+                };
+            }
+            return validateExistAlias(user).then(alias => {
+                user.setAlias(alias);
+                user.setUserKey(alias);
+                return dm.registerUser(user).then(data => {
+                    try{
+                        const response = {
+                            code: 200,
+                            message: 'OK',
+                            data: {}
+                        };
+                        if(!data){
+                            response.code = 9001;
+                            response.message = 'ERROR REGISTRANDO USUARIO';
+                        }
+                        return response;
+                    }catch (e) {
+                        throw e
+                    }
+                }).catch(e => {
+                    console.log(e);
+                    throw e
+                });
+            });
+        }).catch(e => {
+            console.log(e);
+            throw e
         });
     }
 };

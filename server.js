@@ -1,5 +1,6 @@
 const lm = require('./logicManagement/logicManagement');
 const LoginModel = require('./models/login.model');
+const User = require('./models/User.model');
 
 const express = require('express');
 const http = require('http');
@@ -17,7 +18,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
 app.get('/', (req, res) => {
     res.status(200).send("Welcome to API REST")
 });
@@ -28,6 +28,13 @@ let respuesta = {
     message: '',
     data: {}
 };
+
+let errorResponse = {
+    error: true,
+    code: 500,
+    message: ''
+};
+
 
 /**
  * get data filter by values
@@ -69,6 +76,31 @@ app.post('/login', function (req, res) {
             respuesta.data = data.data;
             respuesta.message = data.message;
             res.send(respuesta);
+        }).catch(err => {
+            errorResponse.message = err;
+            res.send(errorResponse);
+        });
+    }
+});
+
+app.post('/register', function (req, res) {
+    if(!req.body.name || !req.body.password || !req.body.email || !req.body.lastName) {
+        respuesta = {
+            error: true,
+            code: 9000,
+            message: 'Error en registro de usuario'
+        };
+        res.send(respuesta);
+    }else{
+        const user = new User(req.body.name, req.body.lastName, req.body.password);
+        lm.registerUser(user, req.body.email).then(data => {
+            respuesta.code = data.code;
+            respuesta.data = data.data;
+            respuesta.message = data.message;
+            res.send(respuesta);
+        }).catch(err => {
+            errorResponse.message = err.message;
+            res.send(errorResponse);
         });
     }
 });
