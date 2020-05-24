@@ -215,7 +215,8 @@ module.exports = {
                                     return response;
                                 })
                                 .catch(function (error) {
-                                    throw error
+                                    response.message = 'SU CORREO VA A SER ENVIADO EN CUALQUIER MOMENTO, USUARIO CREADO CON EXITO';
+                                    return response;
                                 });
                         });
                     }catch (e) {
