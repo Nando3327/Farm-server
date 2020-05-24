@@ -1,5 +1,7 @@
 let dm = require('../dataManagement/dataManagement');
 const axios = require('axios').default;
+const DateModelFormatClass = require('../models/DateModelFormat.model');
+const DateModelFormat = new DateModelFormatClass();
 
 let sortFilterData = function (data, filter, max, sort, orientation) {
     let responseData = filterData(data, filter, max);
@@ -31,7 +33,46 @@ let sortData = function (data, sort, orientation) {
 };
 
 let createAlias = function(user) {
-    return user.name.substring(0, 1).toUpperCase() + user.lastname.split(' ')[0] + Math.floor(Math.random() * 10000);
+    return user.name.substring(0, 1).toUpperCase() + user.lastname.split(' ')[0].toLowerCase() + Math.floor(Math.random() * 10000);
+};
+
+let formatDates = function(date, separator = '/', format = DateModelFormat.dayMonthYear)  {
+    let month = date.getMonth() + 1;
+    let ret = '';
+    switch (format) {
+        case DateModelFormat.yearMonthDay: {
+            ret = date.getFullYear() + separator + month + separator + date.getDate();
+            break;
+        }
+        case DateModelFormat.yearMonthDayCeros: {
+            ret = date.getFullYear() + separator + padLeft(month.toString(), 2) + separator + padLeft(date.getDate().toString(), 2);
+            break;
+        }
+        case DateModelFormat.dayMonthYearCeros: {
+            ret = padLeft(date.getDate().toString(), 2) + separator + padLeft(month.toString(), 2) + separator + date.getFullYear();
+            break;
+        }
+
+        case DateModelFormat.dateWithoutSeparatorAM: {
+            ret = date.getFullYear() + padLeft(month.toString(), 2);
+            break;
+        }
+        case DateModelFormat.dateWithoutSeparatorAMD: {
+            ret = date.getFullYear() + padLeft(month.toString(), 2) + padLeft(date.getDate().toString(), 2);
+            break;
+        }
+        default: {
+            ret = date.getDate() + separator + month + separator + date.getFullYear();
+            break;
+        }
+    }
+    return ret;
+};
+
+let padLeft = function(str, len, ch = '0') {
+    len = len - str.length + 1;
+    return len > 0 ?
+        new Array(len).join(ch) + str : str;
 };
 
 let validateExistAlias = function(user) {
@@ -162,7 +203,7 @@ module.exports = {
                                 "source": "FR",
                                 "data": {
                                     "USUARIO": user.name + ' ' + user.lastname,
-                                    "FECHA": new Date().getFullYear() + '/' + new Date().getMonth() + '/' + new Date().getDate(),
+                                    "FECHA": formatDates(new Date(), '/', DateModelFormat.yearMonthDayCeros),
                                     "USERKEY": alias
                                 },
                                 "receiver": mail
