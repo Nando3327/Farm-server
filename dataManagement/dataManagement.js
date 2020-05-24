@@ -10,11 +10,7 @@ connection.connect((err) => {
     console.log('Connected!');
 });
 
-// connection.end((err) => {
-//     // The connection is terminated gracefully
-//     // Ensures all remaining queries are executed
-//     // Then sends a quit packet to the MySQL server.
-// });
+
 
 module.exports = {
     getData: function () {
