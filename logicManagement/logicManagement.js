@@ -1,4 +1,5 @@
 let dm = require('../dataManagement/dataManagement');
+const axios = require('axios').default;
 
 let sortFilterData = function (data, filter, max, sort, orientation) {
     let responseData = filterData(data, filter, max);
@@ -117,7 +118,7 @@ module.exports = {
                 response.data.key =  data.UserKey;
                 response.data.email =  data.Email;
             }else{
-                response.code = 9001;
+                response.code = 8001;
                 response.message = 'USUARIO Y/O PASSWORD INCORRECTO';
             }
             return response;
@@ -131,7 +132,7 @@ module.exports = {
         return dm.validateExistEmailAddres(mail).then(existEmail => {
             if(existEmail){
                 return {
-                    code: 9000,
+                    code: 8000,
                     message: 'EMAIL YA REGISTRADO',
                     data: {}
                 };
@@ -147,10 +148,35 @@ module.exports = {
                             data: {}
                         };
                         if(!data){
-                            response.code = 9001;
+                            response.code = 8001;
                             response.message = 'ERROR REGISTRANDO USUARIO';
                         }
-                        return response;
+                        return dm.getAuthorizer('NOTIFICATIONS', 'REGISTER').then(dataAuthorizer => {
+                            if(!dataAuthorizer){
+                                response.code = 8001;
+                                response.message = 'NO EXISTE INFORMACION EN AUTORIZADOR PARA ENVIO CORREOS';
+                                return  response;
+                            }
+                            return axios.post(dataAuthorizer.authorized + dataAuthorizer.method, {
+                                "code": "1000",
+                                "source": "FR",
+                                "data": {
+                                    "USUARIO": user.name + ' ' + user.lastname,
+                                    "FECHA": new Date().getFullYear() + '/' + new Date().getMonth() + '/' + new Date().getDate(),
+                                    "USERKEY": alias
+                                },
+                                "receiver": mail
+                            })
+                                .then(function (res) {
+                                    if(res && res.data && res.data.error){
+                                        response.data = res.data;
+                                    }
+                                    return response;
+                                })
+                                .catch(function (error) {
+                                    throw error
+                                });
+                        });
                     }catch (e) {
                         throw e
                     }

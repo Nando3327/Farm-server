@@ -65,7 +65,7 @@ app.post('/login', function (req, res) {
     if(!req.body.name || !req.body.password) {
         respuesta = {
             error: true,
-            code: 9000,
+            code: 8000,
             message: 'Error de usuario y/o contraseña'
         };
         res.send(respuesta);
@@ -87,7 +87,7 @@ app.post('/register', function (req, res) {
     if(!req.body.name || !req.body.password || !req.body.email || !req.body.lastName) {
         respuesta = {
             error: true,
-            code: 9000,
+            code: 8000,
             message: 'Error en registro de usuario'
         };
         res.send(respuesta);

@@ -82,8 +82,8 @@ module.exports = {
         return new Promise((resolve, reject) => {
             const query = 'SELECT alias ' +
                 'FROM SECURITY.users ' +
-                'WHERE userkey = "' + alias + '" or alias = "' + alias + '"';
-            connection.query(query, (err, rows) => {
+                'WHERE userkey = ? or alias = ?';
+            connection.query(query,[alias, alias], (err, rows) => {
                 if (err){
                     reject('SQL ERROR');
                     return;
@@ -97,13 +97,28 @@ module.exports = {
         return new Promise((resolve, reject) => {
             const query = 'SELECT value ' +
                 'FROM SECURITY.address ' +
-                'WHERE value = "' + mail + '"';
-            connection.query(query, (err, rows) => {
+                'WHERE value = ? ';
+            connection.query(query, [mail],(err, rows) => {
                 if (err){
                     reject('SQL ERROR');
                     return;
                 }
                 resolve((rows && rows.length > 0));
+            });
+        });
+    },
+
+    getAuthorizer: function (source, method) {
+        return new Promise((resolve, reject) => {
+            const query = 'SELECT mt.value as method, au.value as authorized ' +
+                'FROM SWITCH.authorizers au INNER JOIN SWITCH.methods mt ON au.source = mt.source ' +
+                'WHERE mt.methodName = ? and au.source = ?; ';
+            connection.query(query, [method, source],(err, rows) => {
+                if (err){
+                    reject('SQL ERROR');
+                    return;
+                }
+                resolve((rows && rows.length > 0) ? rows[0]: undefined);
             });
         });
     }
