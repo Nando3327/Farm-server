@@ -10,8 +10,6 @@ connection.connect((err) => {
     console.log('Connected!');
 });
 
-
-
 module.exports = {
     getData: function () {
         const axios = require('axios');
