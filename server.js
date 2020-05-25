@@ -105,6 +105,48 @@ app.post('/register', function (req, res) {
     }
 });
 
+app.post('/restoreUser', function (req, res) {
+    if(!req.body.mail) {
+        respuesta = {
+            error: true,
+            code: 8000,
+            message: 'Email requerido'
+        };
+        res.send(respuesta);
+    }else{
+        lm.forgetUser(req.body.mail).then(data => {
+            respuesta.code = data.code;
+            respuesta.data = data.data;
+            respuesta.message = data.message;
+            res.send(respuesta);
+        }).catch(err => {
+            errorResponse.message = err.message;
+            res.send(errorResponse);
+        });
+    }
+});
+
+app.post('/restorePassword', function (req, res) {
+    if(!req.body.mail) {
+        respuesta = {
+            error: true,
+            code: 8000,
+            message: 'Email requerido'
+        };
+        res.send(respuesta);
+    }else{
+        lm.restorePassword(req.body.mail).then(data => {
+            respuesta.code = data.code;
+            respuesta.data = data.data;
+            respuesta.message = data.message;
+            res.send(respuesta);
+        }).catch(err => {
+            errorResponse.message = err.message;
+            res.send(errorResponse);
+        });
+    }
+});
+
 http.createServer(app).listen(8001, () => {
     console.log('Server started at http://localhost:8001');
 });

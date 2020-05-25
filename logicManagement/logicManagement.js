@@ -32,11 +32,11 @@ let sortData = function (data, sort, orientation) {
     });
 };
 
-let createAlias = function(user) {
+let createAlias = function (user) {
     return user.name.substring(0, 1).toUpperCase() + user.lastname.split(' ')[0].toLowerCase() + Math.floor(Math.random() * 10000);
 };
 
-let formatDates = function(date, separator = '/', format = DateModelFormat.dayMonthYear)  {
+let formatDates = function (date, separator = '/', format = DateModelFormat.dayMonthYear) {
     let month = date.getMonth() + 1;
     let ret = '';
     switch (format) {
@@ -69,19 +69,19 @@ let formatDates = function(date, separator = '/', format = DateModelFormat.dayMo
     return ret;
 };
 
-let padLeft = function(str, len, ch = '0') {
+let padLeft = function (str, len, ch = '0') {
     len = len - str.length + 1;
     return len > 0 ?
         new Array(len).join(ch) + str : str;
 };
 
-let validateExistAlias = function(user) {
+let validateExistAlias = function (user) {
     let alias = createAlias(user);
     return new Promise((resolve) => {
         dm.validateExistAlias(alias).then(valid => {
-            if(valid) {
+            if (valid) {
                 validateExistAlias(user);
-            }else{
+            } else {
                 resolve(alias);
             }
         }).catch(e => {
@@ -152,13 +152,13 @@ module.exports = {
                     email: ''
                 }
             };
-            if(data){
-                response.data.name =  data.Name;
-                response.data.lastName =  data.LastName;
-                response.data.alias =  data.Alias;
-                response.data.key =  data.UserKey;
-                response.data.email =  data.Email;
-            }else{
+            if (data) {
+                response.data.name = data.Name;
+                response.data.lastName = data.LastName;
+                response.data.alias = data.Alias;
+                response.data.key = data.UserKey;
+                response.data.email = data.Email;
+            } else {
                 response.code = 8001;
                 response.message = 'USUARIO Y/O PASSWORD INCORRECTO';
             }
@@ -171,7 +171,7 @@ module.exports = {
 
     registerUser: function (user, mail) {
         return dm.validateExistEmailAddres(mail).then(existEmail => {
-            if(existEmail){
+            if (existEmail) {
                 return {
                     code: 8000,
                     message: 'EMAIL YA REGISTRADO',
@@ -182,21 +182,21 @@ module.exports = {
                 user.setAlias(alias);
                 user.setUserKey(alias);
                 return dm.registerUser(user, mail).then(data => {
-                    try{
+                    try {
                         const response = {
                             code: 200,
                             message: 'OK',
                             data: {}
                         };
-                        if(!data){
+                        if (!data) {
                             response.code = 8001;
                             response.message = 'ERROR REGISTRANDO USUARIO';
                         }
                         return dm.getAuthorizer('NOTIFICATIONS', 'REGISTER').then(dataAuthorizer => {
-                            if(!dataAuthorizer){
+                            if (!dataAuthorizer) {
                                 response.code = 8001;
                                 response.message = 'NO EXISTE INFORMACION EN AUTORIZADOR PARA ENVIO CORREOS';
-                                return  response;
+                                return response;
                             }
                             return axios.post(dataAuthorizer.authorized + dataAuthorizer.method, {
                                 "code": "1000",
@@ -209,7 +209,7 @@ module.exports = {
                                 "receiver": mail
                             })
                                 .then(function (res) {
-                                    if(res && res.data && res.data.error){
+                                    if (res && res.data && res.data.error) {
                                         response.data = res.data;
                                     }
                                     return response;
@@ -219,7 +219,7 @@ module.exports = {
                                     return response;
                                 });
                         });
-                    }catch (e) {
+                    } catch (e) {
                         throw e
                     }
                 }).catch(e => {
@@ -231,5 +231,107 @@ module.exports = {
             console.log(e);
             throw e
         });
+    },
+
+    restorePassword: function (mail) {
+        return dm.getUserDataByEmail(mail).then(userData => {
+            if (userData) {
+                const response = {
+                    code: 200,
+                    message: 'OK',
+                    data: {}
+                };
+                const password = Math.random().toString(36).slice(-8);
+                return dm.updateUserPassword(userData, password).then(updateUser => {
+                    if(updateUser){
+                        return dm.getAuthorizer('NOTIFICATIONS', 'REGISTER').then(dataAuthorizer => {
+                            if (!dataAuthorizer) {
+                                response.code = 8001;
+                                response.message = 'NO EXISTE INFORMACION EN AUTORIZADOR PARA ENVIO CORREOS';
+                                return response;
+                            }
+                            return axios.post(dataAuthorizer.authorized + dataAuthorizer.method, {
+                                "code": "1002",
+                                "source": "FR",
+                                "data": {
+                                    "USERKEY": userData.Alias,
+                                    "PASSWORD": password
+                                },
+                                "receiver": mail
+                            })
+                                .then(function (res) {
+                                    if (res && res.data && res.data.error) {
+                                        response.data = res.data;
+                                    }
+                                    return response;
+                                })
+                                .catch(function (error) {
+                                    response.message = 'SU CORREO VA A SER ENVIADO EN CUALQUIER MOMENTO, ENVIO DE PASSWORD GENERADO CORRECTO';
+                                    return response;
+                                });
+                        });
+                    }else{
+                        return {
+                            code: 8004,
+                            data: {},
+                            message: 'NO SE PUDO ACTUALIZAR EL PASSWORD'
+                        }
+                    }
+
+                });
+            } else {
+                return {
+                    code: 8003,
+                    data: {},
+                    message: 'CORREO NO REGISTRADO'
+                }
+            }
+
+        })
+    },
+
+    forgetUser: function (mail) {
+        return dm.getUserDataByEmail(mail).then(userData => {
+            if (userData) {
+                const response = {
+                    code: 200,
+                    message: 'OK',
+                    data: {}
+                };
+                return dm.getAuthorizer('NOTIFICATIONS', 'REGISTER').then(dataAuthorizer => {
+                    if (!dataAuthorizer) {
+                        response.code = 8001;
+                        response.message = 'NO EXISTE INFORMACION EN AUTORIZADOR PARA ENVIO CORREOS';
+                        return response;
+                    }
+                    return axios.post(dataAuthorizer.authorized + dataAuthorizer.method, {
+                        "code": "1001",
+                        "source": "FR",
+                        "data": {
+                            "USERKEY": userData.Alias
+                        },
+                        "receiver": mail
+                    })
+                        .then(function (res) {
+                            if (res && res.data && res.data.error) {
+                                response.data = res.data;
+                            }
+                            return response;
+                        })
+                        .catch(function (error) {
+                            response.message = 'SU CORREO VA A SER ENVIADO EN CUALQUIER MOMENTO, ENVIO DE USUARIO CORRECTO';
+                            return response;
+                        });
+                });
+            } else {
+                return {
+                    code: 8003,
+                    data: {},
+                    message: 'CORREO NO REGISTRADO'
+                }
+            }
+
+        })
     }
+
 };

@@ -42,6 +42,26 @@ module.exports = {
         });
     },
 
+    getUserDataByEmail: function (email) {
+        return new Promise((resolve, reject) => {
+            try {
+                const query = 'SELECT Name, LastName, U.UserKey, Alias, A.Value as Email ' +
+                    'FROM SECURITY.users U INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
+                    'WHERE A.Value = ? and A.Categorie = "PR" and A.Type = "EM"';
+                connection.query(query, [email], (err, rows) => {
+                    if (err){
+                        reject('SQL ERROR');
+                        return;
+                    }
+                    resolve((rows && rows.length > 0) ? rows[0] : undefined);
+                });
+            } catch (e) {
+                console.log(e);
+                resolve(e);
+            }
+        });
+    },
+
     registerUser: function (data, mail) {
         return new Promise((resolve, reject) => {
             try {
@@ -119,6 +139,21 @@ module.exports = {
                     return;
                 }
                 resolve((rows && rows.length > 0) ? rows[0]: undefined);
+            });
+        });
+    },
+
+    updateUserPassword: function (user, password) {
+        return new Promise((resolve, reject) => {
+            const query = 'UPDATE SECURITY.users ' +
+                'SET Password = ? ' +
+                'WHERE UserKey = ?';
+            connection.query(query, [md5(password), user.UserKey],(err, res) => {
+                if (err){
+                    reject('SQL ERROR');
+                    return;
+                }
+                resolve(res);
             });
         });
     }
