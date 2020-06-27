@@ -149,7 +149,8 @@ module.exports = {
                     lastName: '',
                     alias: '',
                     key: '',
-                    email: ''
+                    email: '',
+                    changePassword: false
                 }
             };
             if (data) {
@@ -158,6 +159,7 @@ module.exports = {
                 response.data.alias = data.Alias;
                 response.data.key = data.UserKey;
                 response.data.email = data.Email;
+                response.data.changePassword = (data.ChangePassword === 1);
             } else {
                 response.code = 8001;
                 response.message = 'USUARIO Y/O PASSWORD INCORRECTO';
@@ -243,7 +245,7 @@ module.exports = {
                 };
                 const password = Math.random().toString(36).slice(-8);
                 return dm.updateUserPassword(userData, password).then(updateUser => {
-                    if(updateUser){
+                    if (updateUser) {
                         return dm.getAuthorizer('NOTIFICATIONS', 'REGISTER').then(dataAuthorizer => {
                             if (!dataAuthorizer) {
                                 response.code = 8001;
@@ -270,7 +272,7 @@ module.exports = {
                                     return response;
                                 });
                         });
-                    }else{
+                    } else {
                         return {
                             code: 8004,
                             data: {},
@@ -332,6 +334,40 @@ module.exports = {
             }
 
         })
-    }
+    },
+
+    setPassword: function (user, oldPassword, password) {
+        return dm.getUserData({
+            name: user,
+            password: oldPassword
+        }).then(userData => {
+            if (userData) {
+                const response = {
+                    code: 200,
+                    message: 'OK',
+                    data: {}
+                };
+                return dm.updateUserPassword(userData, password, false).then(updateUser => {
+                    if (updateUser) {
+                        return response;
+                    } else {
+                        return {
+                            code: 8004,
+                            data: {},
+                            message: 'NO SE PUDO ACTUALIZAR EL PASSWORD'
+                        }
+                    }
+
+                });
+            } else {
+                return {
+                    code: 8006,
+                    data: {},
+                    message: 'PASSWORD ANTERIOR INCORRECTO'
+                }
+            }
+
+        })
+    },
 
 };

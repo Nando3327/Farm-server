@@ -147,6 +147,34 @@ app.post('/restorePassword', function (req, res) {
     }
 });
 
+app.post('/resetPassword', function (req, res) {
+    if(!req.body.user || !req.body.oldPassword || !req.body.password) {
+        respuesta = {
+            error: true,
+            code: 8000,
+            message: 'Datos incompletos'
+        };
+        res.send(respuesta);
+    } if(req.body.oldPassword ===req.body.password ) {
+        respuesta = {
+            error: true,
+            code: 8008,
+            message: 'Password anterior y password actual son los mismos'
+        };
+        res.send(respuesta);
+    }else{
+        lm.setPassword(req.body.user, req.body.oldPassword, req.body.password).then(data => {
+            respuesta.code = data.code;
+            respuesta.data = data.data;
+            respuesta.message = data.message;
+            res.send(respuesta);
+        }).catch(err => {
+            errorResponse.message = err.message;
+            res.send(errorResponse);
+        });
+    }
+});
+
 http.createServer(app).listen(8001, () => {
     console.log('Server started at http://localhost:8001');
 });

@@ -25,10 +25,10 @@ module.exports = {
     getUserData: function (data) {
         return new Promise((resolve, reject) => {
             try {
-                const query = 'SELECT Name, LastName, U.UserKey, Alias, A.Value as Email ' +
+                const query = 'SELECT Name, LastName, U.UserKey, Alias, A.Value as Email, ChangePassword ' +
                     'FROM SECURITY.users U INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
-                    'WHERE (U.UserKey = ? or A.value = ? ) and Password = ? and A.Categorie = "PR" and A.Type = "EM"';
-                connection.query(query, [data.name, data.name, md5(data.password)], (err, rows) => {
+                    'WHERE (U.UserKey = ? or A.value = ? or U.Alias = ? ) and Password = ? and A.Categorie = "PR" and A.Type = "EM"';
+                connection.query(query, [data.name, data.name, data.name, md5(data.password)], (err, rows) => {
                     if (err){
                         reject('SQL ERROR');
                         return;
@@ -45,7 +45,7 @@ module.exports = {
     getUserDataByEmail: function (email) {
         return new Promise((resolve, reject) => {
             try {
-                const query = 'SELECT Name, LastName, U.UserKey, Alias, A.Value as Email ' +
+                const query = 'SELECT Name, LastName, U.UserKey, Alias, A.Value as Email, ChangePassword ' +
                     'FROM SECURITY.users U INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
                     'WHERE A.Value = ? and A.Categorie = "PR" and A.Type = "EM"';
                 connection.query(query, [email], (err, rows) => {
@@ -143,12 +143,12 @@ module.exports = {
         });
     },
 
-    updateUserPassword: function (user, password) {
+    updateUserPassword: function (user, password, changePassword = true) {
         return new Promise((resolve, reject) => {
             const query = 'UPDATE SECURITY.users ' +
-                'SET Password = ? ' +
+                'SET Password = ?, ChangePassword = ? ' +
                 'WHERE UserKey = ?';
-            connection.query(query, [md5(password), user.UserKey],(err, res) => {
+            connection.query(query, [md5(password), changePassword, user.UserKey],(err, res) => {
                 if (err){
                     reject('SQL ERROR');
                     return;
