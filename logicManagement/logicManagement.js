@@ -370,4 +370,23 @@ module.exports = {
         })
     },
 
+    setAlias: function (user, newAlias) {
+        const response = {
+            code: 200,
+            message: 'OK',
+            data: {}
+        };
+        return dm.updateUserAlias(user, newAlias).then(updateUser => {
+            if (updateUser) {
+                return response;
+            } else {
+                return {
+                    code: 8004,
+                    data: {},
+                    message: 'NO SE PUDO ACTUALIZAR EL ALIAS'
+                }
+            }
+        });
+    },
+
 };

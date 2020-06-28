@@ -156,5 +156,20 @@ module.exports = {
                 resolve(res);
             });
         });
+    },
+
+    updateUserAlias: function (user, alias) {
+        return new Promise((resolve, reject) => {
+            const query = 'UPDATE SECURITY.users ' +
+                'SET Alias = ? ' +
+                'WHERE UserKey = ?';
+            connection.query(query, [alias, user],(err, res) => {
+                if (err){
+                    reject('SQL ERROR');
+                    return;
+                }
+                resolve(res);
+            });
+        });
     }
 };

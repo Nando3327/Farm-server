@@ -175,6 +175,34 @@ app.post('/resetPassword', function (req, res) {
     }
 });
 
+app.post('/changeAlias', function (req, res) {
+    if(!req.body.user || !req.body.newAlias || !req.body.alias) {
+        respuesta = {
+            error: true,
+            code: 8000,
+            message: 'Datos incompletos'
+        };
+        res.send(respuesta);
+    } if(req.body.alias === req.body.newAlias ) {
+        respuesta = {
+            error: true,
+            code: 8008,
+            message: 'No se puede agregar el mismo alias al usuario'
+        };
+        res.send(respuesta);
+    }else{
+        lm.setAlias(req.body.user, req.body.newAlias).then(data => {
+            respuesta.code = data.code;
+            respuesta.data = data.data;
+            respuesta.message = data.message;
+            res.send(respuesta);
+        }).catch(err => {
+            errorResponse.message = err.message;
+            res.send(errorResponse);
+        });
+    }
+});
+
 http.createServer(app).listen(8001, () => {
     console.log('Server started at http://localhost:8001');
 });
