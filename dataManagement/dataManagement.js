@@ -32,11 +32,11 @@ module.exports = {
                     'INNER JOIN SECURITY.profiles P ON P.id = UP.profile ' +
                     'WHERE (U.UserKey = ? or A.value = ? or U.Alias = ? ) and Password = ? and A.Categorie = "PR" and A.Type = "EM"';
                 connection.query(query, [data.name, data.name, data.name, md5(data.password)], (err, rows) => {
-                    if (err){
+                    if (err) {
                         reject('SQL ERROR');
                         return;
                     }
-                    if(rows && rows.length > 0) {
+                    if (rows && rows.length > 0) {
                         const returnObj = {
                             Name: rows[0].Name,
                             LastName: rows[0].LastName,
@@ -46,7 +46,7 @@ module.exports = {
                             ChangePassword: rows[0].ChangePassword,
                             profiles: []
                         };
-                        rows.forEach( r => {
+                        rows.forEach(r => {
                             returnObj.profiles.push({
                                 id: r.profileId,
                                 name: r.profileName,
@@ -54,7 +54,7 @@ module.exports = {
                             })
                         });
                         resolve(returnObj);
-                    }else{
+                    } else {
                         resolve(undefined);
                     }
                 });
@@ -77,21 +77,21 @@ module.exports = {
                     '  INNER JOIN SECURITY.user_profile UP ON UP.profile = P.id ' +
                     'WHERE UP.user = ? AND P.id = ? AND A.active = 1 AND M.active = 1 AND T.active = 1 AND PT.active = 1';
                 connection.query(query, [userKey, profile], (err, rows) => {
-                    if (err){
+                    if (err) {
                         reject('SQL ERROR');
                         return;
                     }
-                    if(rows && rows.length > 0){
+                    if (rows && rows.length > 0) {
                         const apps = [...new Set(rows.map(item => item.appCode))];
                         const response = {
-                            app:[],
+                            app: [],
                             profile: profile
                         };
                         apps.forEach(a => {
-                            const appsRows = rows.find( ap => {
+                            const appsRows = rows.find(ap => {
                                 return ap.appCode === a
                             });
-                            if(appsRows) {
+                            if (appsRows) {
                                 response.app.push({
                                     code: appsRows.appCode,
                                     name: appsRows.appName,
@@ -101,12 +101,12 @@ module.exports = {
                             }
                         });
                         response.app.forEach(a => {
-                            const appsRows = rows.filter( ap => {
+                            const appsRows = rows.filter(ap => {
                                 return ap.appCode === a.code
                             });
                             const modules = [...new Set(appsRows.map(item => item.modCode))];
                             modules.forEach(m => {
-                                const moduleRows = rows.find( mo => {
+                                const moduleRows = rows.find(mo => {
                                     return mo.modCode === m
                                 });
                                 a.modules.push({
@@ -119,12 +119,12 @@ module.exports = {
                         });
                         response.app.forEach(a => {
                             a.modules.forEach(m => {
-                                const modulesRows = rows.filter( ap => {
+                                const modulesRows = rows.filter(ap => {
                                     return ap.modCode === m.code
                                 });
                                 const transactions = [...new Set(modulesRows.map(item => item.trCode))];
                                 transactions.forEach(t => {
-                                    const transactionRows = rows.find( tr => {
+                                    const transactionRows = rows.find(tr => {
                                         return tr.trCode === t
                                     });
                                     m.transactions.push({
@@ -137,7 +137,7 @@ module.exports = {
                             });
                         });
                         resolve(response);
-                    }else{
+                    } else {
                         resolve(undefined);
                     }
                 });
@@ -155,7 +155,7 @@ module.exports = {
                     'FROM SECURITY.users U INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
                     'WHERE A.Value = ? and A.Categorie = "PR" and A.Type = "EM"';
                 connection.query(query, [email], (err, rows) => {
-                    if (err){
+                    if (err) {
                         reject('SQL ERROR');
                         return;
                     }
@@ -176,10 +176,11 @@ module.exports = {
                     Name: data.name,
                     LastName: data.lastname,
                     Password: md5(data.password),
-                    Alias: data.alias
+                    Alias: data.alias,
+                    ChangePassword: 0
                 };
                 connection.query('INSERT SECURITY.users SET ?', user, (err, res) => {
-                    if (err){
+                    if (err) {
                         reject('SQL ERROR');
                         return;
                     }
@@ -190,11 +191,31 @@ module.exports = {
                         Categorie: 'PR'
                     };
                     connection.query('INSERT SECURITY.address SET ?', address, (err, res) => {
-                        if (err){
+                        if (err) {
                             reject('SQL ERROR');
                             return;
                         }
-                        resolve(res);
+                        const query = 'SELECT id ' +
+                            'FROM SECURITY.profiles ' +
+                            'WHERE defaultProfile = 1 and type = "P"';
+                        connection.query(query, (err, rows) => {
+                            if (err) {
+                                reject('SQL ERROR');
+                                return;
+                            }
+                            const userProfile = {
+                                profile: rows[0].id,
+                                user: data.userKey,
+                                principal: 1
+                            };
+                            connection.query('INSERT SECURITY.user_profile SET ?', userProfile, (err, res) => {
+                                if (err) {
+                                    reject('SQL ERROR');
+                                    return;
+                                }
+                                resolve(res);
+                            });
+                        });
                     });
                 });
             } catch (e) {
@@ -209,8 +230,8 @@ module.exports = {
             const query = 'SELECT alias ' +
                 'FROM SECURITY.users ' +
                 'WHERE userkey = ? or alias = ?';
-            connection.query(query,[alias, alias], (err, rows) => {
-                if (err){
+            connection.query(query, [alias, alias], (err, rows) => {
+                if (err) {
                     reject('SQL ERROR');
                     return;
                 }
@@ -224,8 +245,8 @@ module.exports = {
             const query = 'SELECT value ' +
                 'FROM SECURITY.address ' +
                 'WHERE value = ? ';
-            connection.query(query, [mail],(err, rows) => {
-                if (err){
+            connection.query(query, [mail], (err, rows) => {
+                if (err) {
                     reject('SQL ERROR');
                     return;
                 }
@@ -239,12 +260,12 @@ module.exports = {
             const query = 'SELECT mt.value as method, au.value as authorized ' +
                 'FROM SWITCH.authorizers au INNER JOIN SWITCH.methods mt ON au.source = mt.source ' +
                 'WHERE mt.methodName = ? and au.source = ?; ';
-            connection.query(query, [method, source],(err, rows) => {
-                if (err){
+            connection.query(query, [method, source], (err, rows) => {
+                if (err) {
                     reject('SQL ERROR');
                     return;
                 }
-                resolve((rows && rows.length > 0) ? rows[0]: undefined);
+                resolve((rows && rows.length > 0) ? rows[0] : undefined);
             });
         });
     },
@@ -254,8 +275,8 @@ module.exports = {
             const query = 'UPDATE SECURITY.users ' +
                 'SET Password = ?, ChangePassword = ? ' +
                 'WHERE UserKey = ?';
-            connection.query(query, [md5(password), changePassword, user.UserKey],(err, res) => {
-                if (err){
+            connection.query(query, [md5(password), changePassword, user.UserKey], (err, res) => {
+                if (err) {
                     reject('SQL ERROR');
                     return;
                 }
@@ -269,8 +290,8 @@ module.exports = {
             const query = 'UPDATE SECURITY.users ' +
                 'SET Alias = ? ' +
                 'WHERE UserKey = ?';
-            connection.query(query, [alias, user],(err, res) => {
-                if (err){
+            connection.query(query, [alias, user], (err, res) => {
+                if (err) {
                     reject('SQL ERROR');
                     return;
                 }
