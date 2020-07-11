@@ -84,7 +84,8 @@ module.exports = {
                     if(rows && rows.length > 0){
                         const apps = [...new Set(rows.map(item => item.appCode))];
                         const response = {
-                            app:[]
+                            app:[],
+                            profile: profile
                         };
                         apps.forEach(a => {
                             const appsRows = rows.find( ap => {
