@@ -190,6 +190,29 @@ module.exports = {
         });
     },
 
+    getProfileData: function (user, profile) {
+        return dm.getUserTransactions(user, profile).then(data => {
+            const response = {
+                code: 200,
+                message: 'OK',
+                data: {
+                    profileData: {}
+                }
+            };
+            if(data) {
+                response.data.profileData = data;
+            }else{
+                response.code = 8009;
+                response.message = 'USUARIO SIN ATRIBIUCIONES';
+                response.data = {};
+            }
+            return response;
+        }).catch(e => {
+            console.log(e);
+            throw e
+        });
+    },
+
     registerUser: function (user, mail) {
         return dm.validateExistEmailAddres(mail).then(existEmail => {
             if (existEmail) {

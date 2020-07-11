@@ -203,6 +203,27 @@ app.post('/changeAlias', function (req, res) {
     }
 });
 
+app.post('/profileData', function (req, res) {
+    if(!req.body.user || !req.body.profile) {
+        respuesta = {
+            error: true,
+            code: 8000,
+            message: 'Datos incompletos'
+        };
+        res.send(respuesta);
+    } else{
+        lm.getProfileData(req.body.user, req.body.profile).then(data => {
+            respuesta.code = data.code;
+            respuesta.data = data.data;
+            respuesta.message = data.message;
+            res.send(respuesta);
+        }).catch(err => {
+            errorResponse.message = err.message;
+            res.send(errorResponse);
+        });
+    }
+});
+
 http.createServer(app).listen(8001, () => {
     console.log('Server started at http://localhost:8001');
 });
