@@ -150,7 +150,9 @@ module.exports = {
                     alias: '',
                     key: '',
                     email: '',
-                    changePassword: false
+                    changePassword: false,
+                    profiles: [],
+                    profileData: {}
                 }
             };
             if (data) {
@@ -160,11 +162,28 @@ module.exports = {
                 response.data.key = data.UserKey;
                 response.data.email = data.Email;
                 response.data.changePassword = (data.ChangePassword === 1);
+                response.data.profiles = data.profiles;
+                let defaultProfile = data.profiles.find( p => {
+                    return p.principal === 1
+                });
+                if(defaultProfile === undefined) {
+                    defaultProfile = data.profiles[0];
+                }
+                return dm.getUserTransactions(data.UserKey, defaultProfile.id).then(profileData => {
+                    if(profileData) {
+                        response.data.profileData = profileData;
+                    }else{
+                        response.code = 8009;
+                        response.message = 'USUARIO SIN ATRIBIUCIONES';
+                        response.data = {};
+                    }
+                    return response;
+                });
             } else {
                 response.code = 8001;
                 response.message = 'USUARIO Y/O PASSWORD INCORRECTO';
+                return response;
             }
-            return response;
         }).catch(e => {
             console.log(e);
             throw e

@@ -25,15 +25,120 @@ module.exports = {
     getUserData: function (data) {
         return new Promise((resolve, reject) => {
             try {
-                const query = 'SELECT Name, LastName, U.UserKey, Alias, A.Value as Email, ChangePassword ' +
-                    'FROM SECURITY.users U INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
+                const query = 'SELECT U.Name, U.LastName, U.UserKey, U.Alias, A.Value as Email, U.ChangePassword, UP.profile as profileId, UP.principal, P.name as profileName ' +
+                    'FROM SECURITY.users U ' +
+                    'INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
+                    'INNER JOIN SECURITY.user_profile UP ON U.UserKey = UP.user ' +
+                    'INNER JOIN SECURITY.profiles P ON P.id = UP.profile ' +
                     'WHERE (U.UserKey = ? or A.value = ? or U.Alias = ? ) and Password = ? and A.Categorie = "PR" and A.Type = "EM"';
                 connection.query(query, [data.name, data.name, data.name, md5(data.password)], (err, rows) => {
                     if (err){
                         reject('SQL ERROR');
                         return;
                     }
-                    resolve((rows && rows.length > 0) ? rows[0] : undefined);
+                    if(rows && rows.length > 0) {
+                        const returnObj = {
+                            Name: rows[0].Name,
+                            LastName: rows[0].LastName,
+                            Alias: rows[0].Alias,
+                            UserKey: rows[0].UserKey,
+                            Email: rows[0].Email,
+                            ChangePassword: rows[0].ChangePassword,
+                            profiles: []
+                        };
+                        rows.forEach( r => {
+                            returnObj.profiles.push({
+                                id: r.profileId,
+                                name: r.profileName,
+                                principal: r.principal
+                            })
+                        });
+                        resolve(returnObj);
+                    }else{
+                        resolve(undefined);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+                resolve(e);
+            }
+        });
+    },
+
+    getUserTransactions: function (userKey, profile) {
+        return new Promise((resolve, reject) => {
+            try {
+                const query = 'SELECT A.code as appCode, A.name as appName, A.icon as appIcon, M.code as modCode, M.name as modName, M.icon as modIcon, T.code as trCode, T.name as trName, T.icon as trIcon, T.link as trLink, P.name as profileName, P.id as profileId ' +
+                    'FROM SECURITY.aplications A' +
+                    '  INNER JOIN SECURITY.modules M ON A.code = M.aplication' +
+                    '  INNER JOIN SECURITY.transactions T ON T.modules = M.code' +
+                    '  INNER JOIN SECURITY.profile_transaction PT ON PT.transaction = T.code' +
+                    '  INNER JOIN SECURITY.profiles P on PT.profile =  P.id' +
+                    '  INNER JOIN SECURITY.user_profile UP ON UP.profile = P.id ' +
+                    'WHERE UP.user = ? AND P.id = ? AND A.active = 1 AND M.active = 1 AND T.active = 1 AND PT.active = 1';
+                connection.query(query, [userKey, profile], (err, rows) => {
+                    if (err){
+                        reject('SQL ERROR');
+                        return;
+                    }
+                    if(rows && rows.length > 0){
+                        const apps = [...new Set(rows.map(item => item.appCode))];
+                        const response = {
+                            app:[]
+                        };
+                        apps.forEach(a => {
+                            const appsRows = rows.find( ap => {
+                                return ap.appCode === a
+                            });
+                            if(appsRows) {
+                                response.app.push({
+                                    code: appsRows.appCode,
+                                    name: appsRows.appName,
+                                    icon: appsRows.appIcon,
+                                    modules: []
+                                })
+                            }
+                        });
+                        response.app.forEach(a => {
+                            const appsRows = rows.filter( ap => {
+                                return ap.appCode === a.code
+                            });
+                            const modules = [...new Set(appsRows.map(item => item.modCode))];
+                            modules.forEach(m => {
+                                const moduleRows = rows.find( mo => {
+                                    return mo.modCode === m
+                                });
+                                a.modules.push({
+                                    code: moduleRows.modCode,
+                                    name: moduleRows.modName,
+                                    icon: moduleRows.modIcon,
+                                    transactions: []
+                                })
+                            });
+                        });
+                        response.app.forEach(a => {
+                            a.modules.forEach(m => {
+                                const modulesRows = rows.filter( ap => {
+                                    return ap.modCode === m.code
+                                });
+                                const transactions = [...new Set(modulesRows.map(item => item.trCode))];
+                                transactions.forEach(t => {
+                                    const transactionRows = rows.find( tr => {
+                                        return tr.trCode === t
+                                    });
+                                    m.transactions.push({
+                                        code: transactionRows.trCode,
+                                        name: transactionRows.trName,
+                                        icon: transactionRows.trIcon,
+                                        link: transactionRows.trLink
+                                    })
+                                });
+                            });
+                        });
+                        resolve(response);
+                    }else{
+                        resolve(undefined);
+                    }
                 });
             } catch (e) {
                 console.log(e);
