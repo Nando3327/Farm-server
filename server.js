@@ -203,7 +203,7 @@ app.post('/changeAlias', function (req, res) {
     }
 });
 
-app.post('/profileData', function (req, res) {
+app.post('/changeProfile', function (req, res) {
     if(!req.body.user || !req.body.profile) {
         respuesta = {
             error: true,
