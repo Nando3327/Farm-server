@@ -30,7 +30,7 @@ module.exports = {
                     'INNER JOIN SECURITY.address A ON U.UserKey = A.UserKey ' +
                     'INNER JOIN SECURITY.user_profile UP ON U.UserKey = UP.user ' +
                     'INNER JOIN SECURITY.profiles P ON P.id = UP.profile ' +
-                    'WHERE (U.UserKey = ? or A.value = ? or U.Alias = ? ) and Password = ? and A.Categorie = "PR" and A.Type = "EM"';
+                    'WHERE (U.UserKey = ? or A.value = ? or U.Alias = ? ) and Password = ? and A.Categorie = "PR" and A.Type = "EM" and P.active = 1';
                 connection.query(query, [data.name, data.name, data.name, md5(data.password)], (err, rows) => {
                     if (err) {
                         reject('SQL ERROR');
@@ -75,7 +75,7 @@ module.exports = {
                     '  INNER JOIN SECURITY.profile_transaction PT ON PT.transaction = T.code' +
                     '  INNER JOIN SECURITY.profiles P on PT.profile =  P.id' +
                     '  INNER JOIN SECURITY.user_profile UP ON UP.profile = P.id ' +
-                    'WHERE UP.user = ? AND P.id = ? AND A.active = 1 AND M.active = 1 AND T.active = 1 AND PT.active = 1';
+                    'WHERE UP.user = ? AND P.id = ? AND A.active = 1 AND M.active = 1 AND T.active = 1 AND PT.active = 1 AND P.active = 1';
                 connection.query(query, [userKey, profile], (err, rows) => {
                     if (err) {
                         reject('SQL ERROR');
