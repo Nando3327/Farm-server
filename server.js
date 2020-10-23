@@ -1,6 +1,4 @@
 const lm = require('./logicManagement/logicManagement');
-const LoginModel = require('./models/login.model');
-const User = require('./models/User.model');
 
 const express = require('express');
 const http = require('http');
@@ -22,7 +20,7 @@ app.get('/', (req, res) => {
     res.status(200).send("Welcome to API REST")
 });
 
-let respuesta = {
+let response = {
     error: false,
     code: 200,
     message: '',
@@ -36,46 +34,39 @@ let errorResponse = {
 };
 
 
+
 /**
- * get data filter by values
- * filter: number of words in title
- * max: "true" indicates that the number of words in title must be greater than filter, otherwise words in title must be smaller than filter
- * sort: indicates the field by which it will be ordered
- * orientation: sort in asc/desc order
+ *GetFarms
  */
-app.get('/data/:filter/:max/:sort/:orientation', (req, res) => {
-    lm.getData(parseInt(req.params.filter), req.params.max, req.params.sort, req.params.orientation, false).then(data => {
-        res.status(200).send({message: 'OK', data: data});
-    })
+app.get('/farms', function (req, res) {
+    lm.getFarms().then(data => {
+        response.code = data.code;
+        response.data = data.data;
+        response.message = data.message;
+        res.send(response);
+    }).catch(err => {
+        errorResponse.message = err;
+        res.send(errorResponse);
+    });
 });
 
 /**
- * get all data
+ *GetFarms by id
  */
-app.get('/data', (req, res) => {
-    lm.getData(0, '', '', '', true).then(data => {
-        res.status(200).send({message: 'OK', data: data});
-    })
-});
-
-/**
- *Ejemplo post
- */
-app.post('/login', function (req, res) {
-    if(!req.body.name || !req.body.password) {
-        respuesta = {
+app.get('/farms/:id', function (req, res) {
+    if(!req.params.id) {
+        response = {
             error: true,
             code: 8000,
-            message: 'Error de usuario y/o contraseña'
+            message: 'Not Found'
         };
-        res.send(respuesta);
+        res.send(response);
     }else{
-        const user = new LoginModel(req.body.name, req.body.password);
-        lm.getUserInfo(user).then(data => {
-            respuesta.code = data.code;
-            respuesta.data = data.data;
-            respuesta.message = data.message;
-            res.send(respuesta);
+        lm.getFarmById(req.params.id).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
         }).catch(err => {
             errorResponse.message = err;
             res.send(errorResponse);
@@ -83,146 +74,76 @@ app.post('/login', function (req, res) {
     }
 });
 
-app.post('/register', function (req, res) {
-    if(!req.body.name || !req.body.password || !req.body.email || !req.body.lastName) {
-        respuesta = {
+/**
+ *GetPounds by id_farm
+ */
+app.get('/pounds/:id', function (req, res) {
+    if(!req.params.id) {
+        response = {
             error: true,
             code: 8000,
-            message: 'Error en registro de usuario'
+            message: 'Not Found'
         };
-        res.send(respuesta);
+        res.send(response);
     }else{
-        const user = new User(req.body.name, req.body.lastName, req.body.password);
-        lm.registerUser(user, req.body.email).then(data => {
-            respuesta.code = data.code;
-            respuesta.data = data.data;
-            respuesta.message = data.message;
-            res.send(respuesta);
+        lm.getPounds(req.params.id).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
         }).catch(err => {
-            errorResponse.message = err.message;
+            errorResponse.message = err;
+            res.send(errorResponse);
+        });
+    }
+});
+/**
+ *Create Farm
+ */
+app.post('/newFarm', function (req, res) {
+    if(!req.body.name) {
+        response = {
+            error: true,
+            code: 8001,
+            message: 'Not register'
+        };
+        res.send(response);
+    }else{
+        lm.createFarm(req.body.name).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
+        }).catch(err => {
+            errorResponse.message = err;
+            res.send(errorResponse);
+        });
+    }
+});
+/**
+ *Create Pound by farm ID
+ */
+app.post('/newPound', function (req, res) {
+    if(!req.body.name || !req.body.size || !req.body.id) {
+        response = {
+            error: true,
+            code: 8001,
+            message: 'Not register'
+        };
+        res.send(response);
+    }else{
+        lm.createPound(req.body.name, req.body.size, req.body.id).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
+        }).catch(err => {
+            errorResponse.message = err;
             res.send(errorResponse);
         });
     }
 });
 
-app.post('/restoreUser', function (req, res) {
-    if(!req.body.mail) {
-        respuesta = {
-            error: true,
-            code: 8000,
-            message: 'Email requerido'
-        };
-        res.send(respuesta);
-    }else{
-        lm.forgetUser(req.body.mail).then(data => {
-            respuesta.code = data.code;
-            respuesta.data = data.data;
-            respuesta.message = data.message;
-            res.send(respuesta);
-        }).catch(err => {
-            errorResponse.message = err.message;
-            res.send(errorResponse);
-        });
-    }
-});
-
-app.post('/restorePassword', function (req, res) {
-    if(!req.body.mail) {
-        respuesta = {
-            error: true,
-            code: 8000,
-            message: 'Email requerido'
-        };
-        res.send(respuesta);
-    }else{
-        lm.restorePassword(req.body.mail).then(data => {
-            respuesta.code = data.code;
-            respuesta.data = data.data;
-            respuesta.message = data.message;
-            res.send(respuesta);
-        }).catch(err => {
-            errorResponse.message = err.message;
-            res.send(errorResponse);
-        });
-    }
-});
-
-app.post('/resetPassword', function (req, res) {
-    if(!req.body.user || !req.body.oldPassword || !req.body.password) {
-        respuesta = {
-            error: true,
-            code: 8000,
-            message: 'Datos incompletos'
-        };
-        res.send(respuesta);
-    } if(req.body.oldPassword ===req.body.password ) {
-        respuesta = {
-            error: true,
-            code: 8008,
-            message: 'Password anterior y password actual son los mismos'
-        };
-        res.send(respuesta);
-    }else{
-        lm.setPassword(req.body.user, req.body.oldPassword, req.body.password).then(data => {
-            respuesta.code = data.code;
-            respuesta.data = data.data;
-            respuesta.message = data.message;
-            res.send(respuesta);
-        }).catch(err => {
-            errorResponse.message = err.message;
-            res.send(errorResponse);
-        });
-    }
-});
-
-app.post('/changeAlias', function (req, res) {
-    if(!req.body.user || !req.body.newAlias || !req.body.alias) {
-        respuesta = {
-            error: true,
-            code: 8000,
-            message: 'Datos incompletos'
-        };
-        res.send(respuesta);
-    } if(req.body.alias === req.body.newAlias ) {
-        respuesta = {
-            error: true,
-            code: 8008,
-            message: 'No se puede agregar el mismo alias al usuario'
-        };
-        res.send(respuesta);
-    }else{
-        lm.setAlias(req.body.user, req.body.newAlias).then(data => {
-            respuesta.code = data.code;
-            respuesta.data = data.data;
-            respuesta.message = data.message;
-            res.send(respuesta);
-        }).catch(err => {
-            errorResponse.message = err.message;
-            res.send(errorResponse);
-        });
-    }
-});
-
-app.post('/changeProfile', function (req, res) {
-    if(!req.body.user || !req.body.profile) {
-        respuesta = {
-            error: true,
-            code: 8000,
-            message: 'Datos incompletos'
-        };
-        res.send(respuesta);
-    } else{
-        lm.getProfileData(req.body.user, req.body.profile).then(data => {
-            respuesta.code = data.code;
-            respuesta.data = data.data;
-            respuesta.message = data.message;
-            res.send(respuesta);
-        }).catch(err => {
-            errorResponse.message = err.message;
-            res.send(errorResponse);
-        });
-    }
-});
 
 http.createServer(app).listen(8001, () => {
     console.log('Server started at http://localhost:8001');
