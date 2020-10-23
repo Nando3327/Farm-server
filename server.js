@@ -189,6 +189,75 @@ app.put('/editPound', function (req, res) {
         });
     }
 });
+/**
+ *Delete Farm by ID
+ */
+app.delete('/deleteFarm/:id', function (req, res) {
+    if(!req.params.id) {
+        response = {
+            error: true,
+            code: 8003,
+            message: 'Not found'
+        };
+        res.send(response);
+    }else{
+        lm.deleteFarm(req.params.id).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
+        }).catch(err => {
+            errorResponse.message = err;
+            res.send(errorResponse);
+        });
+    }
+});
+/**
+ *Delete Pound by ID
+ */
+app.delete('/deletePound/:id', function (req, res) {
+    if(!req.params.id) {
+        response = {
+            error: true,
+            code: 8004,
+            message: 'Not found'
+        };
+        res.send(response);
+    }else{
+        lm.deletePound(req.params.id).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
+        }).catch(err => {
+            errorResponse.message = err;
+            res.send(errorResponse);
+        });
+    }
+});
+/**
+ *Delete Pounds by ID Farm
+ */
+app.delete('/deletePounds/:id', function (req, res) {
+    if(!req.params.id) {
+        response = {
+            error: true,
+            code: 8004,
+            message: 'Not found'
+        };
+        res.send(response);
+    }else{
+        lm.deletePounds(req.params.id).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
+        }).catch(err => {
+            errorResponse.message = err;
+            res.send(errorResponse);
+        });
+    }
+});
 
 
 http.createServer(app).listen(8001, () => {

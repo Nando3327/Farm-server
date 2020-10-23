@@ -118,6 +118,10 @@ module.exports = {
                         resolve({
                             affectedRows: res.affectedRows
                         });
+                    }else{
+                        resolve({
+                            result: 'No rows affected'
+                        });
                     }
                 });
             } catch (e) {
@@ -137,6 +141,82 @@ module.exports = {
                     if(res.affectedRows > 0){
                         resolve({
                             affectedRows: res.affectedRows
+                        });
+                    }else{
+                        resolve({
+                            result: 'No rows affected'
+                        });
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+                reject(e);
+            }
+        });
+    },
+    deleteFarm: function (id) {
+        return new Promise((resolve, reject) => {
+            try {
+                connection.query('DELETE FROM FARM.farms Where id = ?', [id], (err, res) => {
+                    if (err) {
+                        reject(err.sqlMessage);
+                        return;
+                    }
+                    if(res.affectedRows > 0){
+                        resolve({
+                            affectedRows: res.affectedRows
+                        });
+                    }else{
+                        resolve({
+                            result: 'No rows affected'
+                        });
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+                reject(e);
+            }
+        });
+    },
+    deletePound: function (id) {
+        return new Promise((resolve, reject) => {
+            try {
+                connection.query('DELETE FROM FARM.pounds Where id = ?', [id], (err, res) => {
+                    if (err) {
+                        reject(err.sqlMessage);
+                        return;
+                    }
+                    if(res.affectedRows > 0){
+                        resolve({
+                            affectedRows: res.affectedRows
+                        });
+                    }else{
+                        resolve({
+                            result: 'No rows affected'
+                        });
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+                reject(e);
+            }
+        });
+    },
+    deletePounds: function (id) {
+        return new Promise((resolve, reject) => {
+            try {
+                connection.query('DELETE FROM FARM.pounds Where Farm_Id = ?', [id], (err, res) => {
+                    if (err) {
+                        reject(err.sqlMessage);
+                        return;
+                    }
+                    if(res.affectedRows > 0){
+                        resolve({
+                            affectedRows: res.affectedRows
+                        });
+                    }else{
+                        resolve({
+                            result: 'No rows affected'
                         });
                     }
                 });

@@ -120,4 +120,72 @@ module.exports = {
             throw e
         });
     },
+    deleteFarm: function (id) {
+        return dm.deletePounds(id).then(dt => {
+            const response = {
+                code: 200,
+                message: 'OK',
+                data: {
+                    pounds: {},
+                    farm: {}
+                }
+            };
+            if (dt) {
+                response.data.pounds = dt;
+            }
+            return dm.deleteFarm(id).then(data => {
+                if (!data) {
+                    response.code = 8003;
+                    response.message = 'Not found';
+                }else{
+                    response.data.farm = data;
+                }
+                return response;
+            }).catch(e => {
+                console.log(e);
+                throw e
+            });
+        }).catch(e => {
+            console.log(e);
+            throw e
+        });
+    },
+    deletePound: function (id) {
+        return dm.deletePound(id).then(data => {
+            const response = {
+                code: 200,
+                message: 'OK',
+                data: {}
+            };
+            if (!data) {
+                response.code = 8004;
+                response.message = 'Not found';
+            }else{
+                response.data = data;
+            }
+            return response;
+        }).catch(e => {
+            console.log(e);
+            throw e
+        });
+    },
+    deletePounds: function (id) {
+        return dm.deletePounds(id).then(data => {
+            const response = {
+                code: 200,
+                message: 'OK',
+                data: {}
+            };
+            if (!data) {
+                response.code = 8004;
+                response.message = 'Not found';
+            }else{
+                response.data = data;
+            }
+            return response;
+        }).catch(e => {
+            console.log(e);
+            throw e
+        });
+    },
 };
