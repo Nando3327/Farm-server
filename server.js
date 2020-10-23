@@ -144,7 +144,7 @@ app.post('/newPound', function (req, res) {
     }
 });
 /**
- *Create Pound by farm ID
+ *Edit Farm by ID
  */
 app.put('/editFarm', function (req, res) {
     if(!req.body.name || !req.body.id) {
@@ -166,6 +166,9 @@ app.put('/editFarm', function (req, res) {
         });
     }
 });
+/**
+ *Edit Pound by ID
+ */
 app.put('/editPound', function (req, res) {
     if(!req.body.name || !req.body.size || !req.body.id) {
         response = {
