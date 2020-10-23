@@ -143,6 +143,49 @@ app.post('/newPound', function (req, res) {
         });
     }
 });
+/**
+ *Create Pound by farm ID
+ */
+app.put('/editFarm', function (req, res) {
+    if(!req.body.name || !req.body.id) {
+        response = {
+            error: true,
+            code: 8002,
+            message: 'Not found'
+        };
+        res.send(response);
+    }else{
+        lm.editFarm(req.body.name, req.body.id).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
+        }).catch(err => {
+            errorResponse.message = err;
+            res.send(errorResponse);
+        });
+    }
+});
+app.put('/editPound', function (req, res) {
+    if(!req.body.name || !req.body.size || !req.body.id) {
+        response = {
+            error: true,
+            code: 8002,
+            message: 'Not found'
+        };
+        res.send(response);
+    }else{
+        lm.editPound(req.body.name, req.body.size ,req.body.id).then(data => {
+            response.code = data.code;
+            response.data = data.data;
+            response.message = data.message;
+            res.send(response);
+        }).catch(err => {
+            errorResponse.message = err;
+            res.send(errorResponse);
+        });
+    }
+});
 
 
 http.createServer(app).listen(8001, () => {

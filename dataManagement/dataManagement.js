@@ -106,4 +106,44 @@ module.exports = {
             }
         });
     },
+    editFarm: function (name, id) {
+        return new Promise((resolve, reject) => {
+            try {
+                connection.query('UPDATE FARM.farms SET Name = ? Where id = ?', [name, id], (err, res) => {
+                    if (err) {
+                        reject(err.sqlMessage);
+                        return;
+                    }
+                    if(res.affectedRows > 0){
+                        resolve({
+                            affectedRows: res.affectedRows
+                        });
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+                reject(e);
+            }
+        });
+    },
+    editPound: function (name, size, id) {
+        return new Promise((resolve, reject) => {
+            try {
+                connection.query('UPDATE FARM.pounds SET Name = ?, Size = ? Where id = ?', [name, size, id], (err, res) => {
+                    if (err) {
+                        reject(err.sqlMessage);
+                        return;
+                    }
+                    if(res.affectedRows > 0){
+                        resolve({
+                            affectedRows: res.affectedRows
+                        });
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+                reject(e);
+            }
+        });
+    },
 };

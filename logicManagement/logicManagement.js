@@ -82,4 +82,42 @@ module.exports = {
             throw e
         });
     },
+    editFarm: function (name, id) {
+        return dm.editFarm(name, id).then(data => {
+            const response = {
+                code: 200,
+                message: 'OK',
+                data: {}
+            };
+            if (!data) {
+                response.code = 8002;
+                response.message = 'Not found';
+            }else {
+                response.data = data;
+            }
+            return response;
+        }).catch(e => {
+            console.log(e);
+            throw e
+        });
+    },
+    editPound: function (name, size, id) {
+        return dm.editPound(name, size, id).then(data => {
+            const response = {
+                code: 200,
+                message: 'OK',
+                data: {}
+            };
+            if (!data) {
+                response.code = 8002;
+                response.message = 'Not found';
+            }else{
+                response.data = data;
+            }
+            return response;
+        }).catch(e => {
+            console.log(e);
+            throw e
+        });
+    },
 };
