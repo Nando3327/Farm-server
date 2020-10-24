@@ -52,6 +52,7 @@ app.get('/farms', function (req, res) {
 
 /**
  *GetFarms by id
+ * id: id farm
  */
 app.get('/farms/:id', function (req, res) {
     if(!req.params.id) {
@@ -76,6 +77,7 @@ app.get('/farms/:id', function (req, res) {
 
 /**
  *GetPounds by id_farm
+ * id: id pound
  */
 app.get('/pounds/:id', function (req, res) {
     if(!req.params.id) {
@@ -99,6 +101,8 @@ app.get('/pounds/:id', function (req, res) {
 });
 /**
  *Create Farm
+ * required:
+ * name: new farm name
  */
 app.post('/newFarm', function (req, res) {
     if(!req.body.name) {
@@ -122,6 +126,10 @@ app.post('/newFarm', function (req, res) {
 });
 /**
  *Create Pound by farm ID
+ * Required:
+ * name: new pound name
+ * size: new pound size
+ * id: farm id
  */
 app.post('/newPound', function (req, res) {
     if(!req.body.name || typeof req.body.size != 'number' || !req.body.id) {
@@ -145,6 +153,9 @@ app.post('/newPound', function (req, res) {
 });
 /**
  *Edit Farm by ID
+ * Required:
+ * name: new name for the farm
+ * id: farm id
  */
 app.put('/editFarm', function (req, res) {
     if(!req.body.name || !req.body.id) {
@@ -168,6 +179,10 @@ app.put('/editFarm', function (req, res) {
 });
 /**
  *Edit Pound by ID
+ * Required:
+ * name: new name for the pound
+ * size: new size for the pound
+ * id: pound id
  */
 app.put('/editPound', function (req, res) {
     if(!req.body.name || typeof req.body.size != 'number' || !req.body.id) {
@@ -191,6 +206,7 @@ app.put('/editPound', function (req, res) {
 });
 /**
  *Delete Farm by ID
+ * id: farm id
  */
 app.delete('/deleteFarm/:id', function (req, res) {
     if(!req.params.id) {
@@ -214,6 +230,7 @@ app.delete('/deleteFarm/:id', function (req, res) {
 });
 /**
  *Delete Pound by ID
+ * id: pound id
  */
 app.delete('/deletePound/:id', function (req, res) {
     if(!req.params.id) {
@@ -237,6 +254,7 @@ app.delete('/deletePound/:id', function (req, res) {
 });
 /**
  *Delete Pounds by ID Farm
+ * id: farm id
  */
 app.delete('/deletePounds/:id', function (req, res) {
     if(!req.params.id) {
