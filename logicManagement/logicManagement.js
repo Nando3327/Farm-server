@@ -39,7 +39,7 @@ module.exports = {
                 code: 200,
                 message: 'OK',
                 data: {
-                    farms: data,
+                    pounds: data,
                     size: parseFloat(size).toFixed(2)
                 }
             };

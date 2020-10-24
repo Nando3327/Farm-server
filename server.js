@@ -124,7 +124,7 @@ app.post('/newFarm', function (req, res) {
  *Create Pound by farm ID
  */
 app.post('/newPound', function (req, res) {
-    if(!req.body.name || !req.body.size || !req.body.id) {
+    if(!req.body.name || typeof req.body.size != 'number' || !req.body.id) {
         response = {
             error: true,
             code: 8001,
@@ -170,7 +170,7 @@ app.put('/editFarm', function (req, res) {
  *Edit Pound by ID
  */
 app.put('/editPound', function (req, res) {
-    if(!req.body.name || !req.body.size || !req.body.id) {
+    if(!req.body.name || typeof req.body.size != 'number' || !req.body.id) {
         response = {
             error: true,
             code: 8002,
