@@ -60,7 +60,9 @@
 ##DATABASE
 
  - the project use mySql 
+ 
     -The schema name must be FARM
+    
     -The following scripts must be executed:
  
  `create table farms
