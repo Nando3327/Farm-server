@@ -1,0 +1,8 @@
+{
+  "db": {
+    "host": "localhost",
+    "user": "farmuser",
+    "password": "farm1pass",
+    "connectionLimit": 10
+  }
+}
